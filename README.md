@@ -2,8 +2,7 @@
   
 #  Safaa-AI 🤖🎤
 
-**A Telegram bot that separates vocals from background music using AI.
-Send a YouTube link or upload an MP3, and get back an isolated vocal track.**
+**A Telegram bot that separates vocals from background music using AI.Send a YouTube link or upload an MP3, and get back an isolated vocal track.**
 
 [![Telegram Bot](https://img.shields.io/badge/Telegram-@@SafaaVocals_bot-0088cc?style=flat-square&logo=telegram)](https://t.me/@SafaaVocals_bot)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python)](https://python.org)
