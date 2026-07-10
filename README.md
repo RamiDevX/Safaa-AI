@@ -4,7 +4,7 @@
 
 **Separate vocals from music using AI. Send a YouTube link or MP3.**
 
-[![Telegram Bot](https://img.shields.io/badge/Telegram-@SafaaVocals_bot-0088cc?style=flat-square&logo=telegram)](https://t.me/@SafaaVocals_bot)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-@SafaaVocals_bot-0088cc?style=flat-square&logo=telegram)](https://t.me/SafaaVocals_bot)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python)](https://python.org)
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)]()
 
