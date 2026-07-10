@@ -79,12 +79,5 @@ Safaa-AI/
 
 **Rami Bitar**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-000000?style=flat-square&logo=linkedin&logoColor=0A66C2)](https://linkedin.com/in/rami-bitar-16479936b)
-[![Telegram](https://img.shields.io/badge/Telegram-000000?style=flat-square&logo=telegram&logoColor=26A5E4)](https://t.me/ramidevx)
-[![Instagram](https://img.shields.io/badge/Instagram-000000?style=flat-square&logo=instagram&logoColor=E4405F)](https://www.instagram.com/ramidevx/)
 [![Gmail](https://img.shields.io/badge/Gmail-000000?style=flat-square&logo=gmail&logoColor=EA4335)](mailto:ramibitar.connect@gmail.com)
 [![Linktree](https://img.shields.io/badge/Linktree-000000?style=flat-square&logo=linktree&logoColor=43E55E)](https://linktr.ee/ramibitarr)
-
-## License
-
-MIT
