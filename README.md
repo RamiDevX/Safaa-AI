@@ -10,6 +10,9 @@
 
 </div>
 
+## About
+A Telegram bot that separates vocals from background music using AI. Send a YouTube link or upload an MP3.
+
 <img width="100%" src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=3"/>
 
 ## Features
