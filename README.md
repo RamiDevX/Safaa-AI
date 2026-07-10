@@ -10,6 +10,8 @@
 
 </div>
 
+<img width="100%" src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=3"/>
+
 ## Features
 
 - 🎥 Extract audio directly from YouTube links
@@ -81,9 +83,22 @@ Safaa-AI/
 - Videos longer than 30 minutes are skipped to avoid excessive resource usage (configurable via `MAX_VIDEO_DURATION_SECONDS` in `bot.py`).
 - Never commit your `.env` file or bot token to version control.
 
-## Developer
+## 👨‍💻 Developer
+
+<div align="center">
 
 **Rami Bitar**
 
-[![Gmail](https://img.shields.io/badge/Gmail-000000?style=flat-square&logo=gmail&logoColor=EA4335)](mailto:ramibitar.connect@gmail.com)
-[![Linktree](https://img.shields.io/badge/Linktree-000000?style=flat-square&logo=linktree&logoColor=43E55E)](https://linktr.ee/ramibitarr)
+[![GitHub](https://img.shields.io/badge/GitHub-RamiDevX-161b22?style=flat-square&logo=github)](https://github.com/RamiDevX)
+[![Telegram](https://img.shields.io/badge/Telegram-@ramidevx-0088cc?style=flat-square&logo=telegram)](https://t.me/ramidevx)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Rami%20Bitar-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/rami-bitar-16479936b)
+
+</div>
+
+<div align="center">
+
+<sub>Safaa AI © 2026</sub>
+
+<img width="100%" src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=3"/>
+
+</div>
