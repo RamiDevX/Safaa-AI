@@ -1,0 +1,24 @@
+# Virtual environments
+.venv/
+venv/
+
+# Bot runtime data (logs + temp session folders)
+bot_data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables / secrets
+.env
+*.token
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store
