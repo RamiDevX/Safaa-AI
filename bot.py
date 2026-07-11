@@ -11,19 +11,24 @@ from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 
+from aiohttp import web
+
 import yt_dlp
 from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")  
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "bot_data"
 DATA_DIR.mkdir(exist_ok=True)
 
-MAX_TELEGRAM_DOWNLOAD_MB = 20      
-MAX_VIDEO_DURATION_SECONDS = 1800 
+MAX_TELEGRAM_DOWNLOAD_MB = 20 
+MAX_VIDEO_DURATION_SECONDS = 1800
+
+
+PORT = int(os.getenv("PORT", 10000))
 
 
 def safe_rmtree(path: Path, retries: int = 5, delay: float = 0.5):
@@ -52,10 +57,9 @@ logging.basicConfig(
     ],
 )
 logger = logging.getLogger("VocalRemoverBot")
-
 YOUTUBE_REGEX = re.compile(
-    r'(?:https?://)?(?:www\\.)?(?:youtube\\.com|youtu\\.be|youtube-nocookie\\.com)'
-    r'/(?:watch\\?v=|embed/|v/|shorts/)?[a-zA-Z0-9_-]{11}\\S*'
+    r'(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be|youtube-nocookie\.com)'
+    r'/(?:watch\?v=|embed/|v/|shorts/)?[a-zA-Z0-9_-]{11}\S*'
 )
 
 
@@ -135,7 +139,7 @@ separator_service = DemucsSeparatorService()
 
 
 @router.message(Command("start"))
-def cmd_start(message: Message):
+async def cmd_start(message: Message):
     welcome_text = (
         "Welcome to the Vocal Remover Bot\n\n"
         "This bot separates the singer’s voice from the music using AI.\n\n"
@@ -156,7 +160,7 @@ def cmd_start(message: Message):
         ]
     )
 
-    return message.reply(welcome_text, reply_markup=keyboard)
+    await message.reply(welcome_text, reply_markup=keyboard)
 
 
 async def process_audio_pipeline(
@@ -246,6 +250,24 @@ async def handle_audio_file_messages(message: Message, bot: Bot):
     )
 
 
+async def start_health_server():
+    """Minimal HTTP server so Render's port scan sees something open.
+    Doesn't do anything else — the bot itself works via polling, not HTTP."""
+
+    async def health_check(request):
+        return web.Response(text="Bot is alive and polling.")
+
+    app = web.Application()
+    app.router.add_get("/", health_check)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=PORT)
+    await site.start()
+
+    logger.info(f"Health-check server listening on 0.0.0.0:{PORT}")
+
+
 async def main():
     if not BOT_TOKEN:
         logger.critical("BOT_TOKEN environment variable is not set.")
@@ -258,7 +280,10 @@ async def main():
     logger.info("Bot is running and polling for updates...")
 
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    await asyncio.gather(
+        start_health_server(),
+        dp.start_polling(bot),
+    )
 
 
 if __name__ == "__main__":
