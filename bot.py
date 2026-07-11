@@ -16,8 +16,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Config ---
-
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 BASE_DIR = Path(__file__).parent
@@ -139,7 +137,7 @@ separator_service = DemucsSeparatorService()
 @router.message(Command("start"))
 def cmd_start(message: Message):
     welcome_text = (
-        "Welcome to the Vocal Remover Bot 🎤\n\n"
+        "Welcome to the Vocal Remover Bot\n\n"
         "This bot separates the singer’s voice from the music using AI.\n\n"
         "📥 How to use:\n"
         "• Send a YouTube video link directly.\n"
