@@ -27,6 +27,21 @@ DATA_DIR.mkdir(exist_ok=True)
 MAX_TELEGRAM_DOWNLOAD_MB = 20      # Bot API hard limit for bot-initiated downloads
 MAX_VIDEO_DURATION_SECONDS = 1800  # skip anything longer than 30 min
 
+
+def safe_rmtree(path: Path, retries: int = 5, delay: float = 0.5):
+    """Delete a directory, retrying on transient Windows file locks
+    (e.g. OneDrive sync, antivirus scans holding a handle briefly)."""
+    import time
+    for attempt in range(retries):
+        try:
+            shutil.rmtree(path)
+            return
+        except PermissionError:
+            if attempt == retries - 1:
+                logger.warning(f"Could not fully clean up {path} after {retries} attempts.")
+                return
+            time.sleep(delay)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -173,7 +188,7 @@ async def process_audio_pipeline(
 
     finally:
         if session_dir.exists():
-            shutil.rmtree(session_dir)
+            safe_rmtree(session_dir)
             logger.info(f"Cleaned up session directory: {request_id}")
 
 
