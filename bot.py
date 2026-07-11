@@ -151,7 +151,7 @@ def cmd_start(message: Message):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Developer Bot",
+                    text="Bot Developer",
                     url="https://t.me/ramidevx",
                 )
             ]
