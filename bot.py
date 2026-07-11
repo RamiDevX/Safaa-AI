@@ -8,7 +8,7 @@ from pathlib import Path
 import uuid
 
 from aiogram import Bot, Dispatcher, F, Router
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 
 import yt_dlp
@@ -18,43 +18,46 @@ load_dotenv()
 
 # --- Config ---
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # loaded from .env, no hardcoded fallback
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "bot_data"
 DATA_DIR.mkdir(exist_ok=True)
 
-MAX_TELEGRAM_DOWNLOAD_MB = 20      # Bot API hard limit for bot-initiated downloads
-MAX_VIDEO_DURATION_SECONDS = 1800  # skip anything longer than 30 min
+MAX_TELEGRAM_DOWNLOAD_MB = 20      
+MAX_VIDEO_DURATION_SECONDS = 1800 
 
 
 def safe_rmtree(path: Path, retries: int = 5, delay: float = 0.5):
-    """Delete a directory, retrying on transient Windows file locks
-    (e.g. OneDrive sync, antivirus scans holding a handle briefly)."""
+    """Delete a directory, retrying on transient Windows file locks."""
     import time
+
     for attempt in range(retries):
         try:
             shutil.rmtree(path)
             return
         except PermissionError:
             if attempt == retries - 1:
-                logger.warning(f"Could not fully clean up {path} after {retries} attempts.")
+                logger.warning(
+                    f"Could not fully clean up {path} after {retries} attempts."
+                )
                 return
             time.sleep(delay)
+
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(DATA_DIR / "bot.log", encoding="utf-8")
-    ]
+        logging.FileHandler(DATA_DIR / "bot.log", encoding="utf-8"),
+    ],
 )
 logger = logging.getLogger("VocalRemoverBot")
 
 YOUTUBE_REGEX = re.compile(
-    r'(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be|youtube-nocookie\.com)'
-    r'/(?:watch\?v=|embed/|v/|shorts/)?[a-zA-Z0-9_-]{11}\S*'
+    r'(?:https?://)?(?:www\\.)?(?:youtube\\.com|youtu\\.be|youtube-nocookie\\.com)'
+    r'/(?:watch\\?v=|embed/|v/|shorts/)?[a-zA-Z0-9_-]{11}\\S*'
 )
 
 
@@ -63,18 +66,20 @@ class YouTubeService:
     async def download_audio(url: str, target_dir: Path) -> Path:
         def _sync_download():
             ydl_opts = {
-                'format': 'bestaudio/best',
-                'outtmpl': str(target_dir / 'input_track.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
-                'quiet': True,
-                'no_warnings': True,
-                'noplaylist': True,
-                'socket_timeout': 30,
-                'match_filter': yt_dlp.utils.match_filter_func(
+                "format": "bestaudio/best",
+                "outtmpl": str(target_dir / "input_track.%(ext)s"),
+                "postprocessors": [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": "192",
+                    }
+                ],
+                "quiet": True,
+                "no_warnings": True,
+                "noplaylist": True,
+                "socket_timeout": 30,
+                "match_filter": yt_dlp.utils.match_filter_func(
                     f"duration < {MAX_VIDEO_DURATION_SECONDS}"
                 ),
             }
@@ -94,27 +99,32 @@ class DemucsSeparatorService:
 
         cmd = [
             "demucs",
-            "--two-stems", "vocals",
-            "-n", self.model_name,
-            "-o", str(output_base_dir),
-            str(input_file_path)
+            "--two-stems",
+            "vocals",
+            "-n",
+            self.model_name,
+            "-o",
+            str(output_base_dir),
+            str(input_file_path),
         ]
 
         process = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout, stderr = await process.communicate()
+        _, stderr = await process.communicate()
 
         if process.returncode != 0:
-            error_msg = stderr.decode(errors='ignore')
+            error_msg = stderr.decode(errors="ignore")
             logger.error(f"Demucs failed: {error_msg}")
             raise RuntimeError("Vocal separation failed.")
 
         filename_stem = input_file_path.stem
-        expected_vocal_path = output_base_dir / self.model_name / filename_stem / "vocals.wav"
+        expected_vocal_path = (
+            output_base_dir / self.model_name / filename_stem / "vocals.wav"
+        )
 
         if not expected_vocal_path.exists():
             raise FileNotFoundError("Separated vocal file not found in output path.")
@@ -127,16 +137,28 @@ separator_service = DemucsSeparatorService()
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message):
+def cmd_start(message: Message):
     welcome_text = (
-        "مرحباً بك في بوت عزل الصوت 🎤\n\n"
-        "هذا البوت يفصل صوت المغني عن الموسيقى باستخدام الذكاء الاصطناعي.\n\n"
-        "📥 طريقة الاستخدام:\n"
-        "• أرسل رابط فيديو من يوتيوب مباشرة.\n"
-        "• أو ارفع ملف صوتي بصيغة MP3.\n\n"
-        "⚙️ سأتولى الباقي وأرسل لك المقطع الصوتي نظيفاً بدون موسيقى."
+        "Welcome to the Vocal Remover Bot 🎤\n\n"
+        "This bot separates the singer’s voice from the music using AI.\n\n"
+        "📥 How to use:\n"
+        "• Send a YouTube video link directly.\n"
+        "• Or upload an audio file in MP3 format.\n\n"
+        "⚙️ I’ll handle the rest and send you a clean audio track without music."
     )
-    await message.reply(welcome_text)
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Developer Bot",
+                    url="https://t.me/ramidevx",
+                )
+            ]
+        ]
+    )
+
+    return message.reply(welcome_text, reply_markup=keyboard)
 
 
 async def process_audio_pipeline(
@@ -164,7 +186,9 @@ async def process_audio_pipeline(
         else:
             raise ValueError("Unsupported source type.")
 
-        await status_message.edit_text("🤖 Separating vocals from music (this can take a minute)...")
+        await status_message.edit_text(
+            "🤖 Separating vocals from music (this can take a minute)..."
+        )
         vocals_wav = await separator_service.separate_vocals(input_file, session_dir)
 
         await status_message.edit_text("📤 Done! Sending your separated audio...")
@@ -174,7 +198,7 @@ async def process_audio_pipeline(
 
         await message.reply_audio(
             audio=vocal_audio_file,
-            caption="🎤 Vocals separated successfully. Enjoy!"
+            caption="🎤 Vocals separated successfully. Enjoy!",
         )
 
         await status_message.delete()
@@ -216,7 +240,11 @@ async def handle_audio_file_messages(message: Message, bot: Bot):
             ext = candidate
 
     await process_audio_pipeline(
-        message, bot, source_type="file", source_data=message.audio.file_id, file_ext=ext
+        message,
+        bot,
+        source_type="file",
+        source_data=message.audio.file_id,
+        file_ext=ext,
     )
 
 
